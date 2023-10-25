@@ -1,12 +1,12 @@
 import React, { useContext, useState } from "react";
-import { mockSearchResults } from "../constants/mock";
 import { XIcon, SearchIcon } from "@heroicons/react/solid";
 import SearchResults from "./SearchResults";
 import ThemeContext from "../context/ThemeContext";
+import { searchSymbols } from "../api/stock-api";
 
 function Search() {
   const [input, setInput] = useState("");
-  const [bestMatches, setBestMatches] = useState(mockSearchResults.result);
+  const [bestMatches, setBestMatches] = useState([]);
 
   const { darkMode } = useContext(ThemeContext);
 
@@ -15,8 +15,17 @@ function Search() {
     setBestMatches([]);
   };
 
-  const updateBestMatches = () => {
-    setBestMatches(mockSearchResults.result);
+  const updateBestMatches = async () => {
+    try {
+      if (input) {
+        const searchResults = await searchSymbols(input);
+        const result = searchResults.result;
+        setBestMatches(result);
+      }
+    } catch (error) {
+      setBestMatches([]);
+      console.log(error);
+    }
   };
   return (
     <div
@@ -47,7 +56,7 @@ function Search() {
       )}
       <button
         onClick={updateBestMatches}
-        className="h-8 w-8 bg-gray-400 rounded-md flex justify-center items-center m-1 p-2"
+        className="h-8 w-8 bg-gray-400 rounded-md flex justify-center items-center m-1 p-2 transition duration-300 hover:ring-2 ring-gray-400 "
       >
         <SearchIcon className="h-4 w-4 fill-black" />
       </button>
